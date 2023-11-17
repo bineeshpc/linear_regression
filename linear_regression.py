@@ -388,3 +388,35 @@ df_train.head()
 #%%
 
 df_train.describe()
+
+#%%
+
+df_train[numerical_variables].describe()
+
+#%%
+# checking the correlation coefficients to see which variables are highly correlated
+
+plt.figure(figsize = (16, 10))
+sns.heatmap(df_train[numerical_variables].corr(), annot = True, cmap="YlGnBu")
+plt.show()
+
+#%% [markdown]
+
+# * apparent_temparature is highly correlated with count
+
+#%%
+
+plt.figure(figsize=[6,6])
+sns.scatterplot(data=df_train, x="apparent_temperature", y="count")
+plt.show()
+
+#%% [markdown]
+
+# ### Dividing into X and Y sets for the model building
+#%%
+
+# y_train = df_train.pop("count")
+# X_train = df_train
+
+y_train = df_train["count"]
+X_train = df_train.drop(["count"], axis=1)
