@@ -6,7 +6,7 @@
 # * Assist management in understanding demand dynamics for strategic planning.
 # ## Data Preparation:
 # * Some numeric columns (e.g., 'weathersit', 'season') with values 1, 2, 3, 4 need conversion into categorical string values as these numeric values do not imply any order.
-# * The 'yr' column representing the years 2018 and 2019 might appear insignificant but might hold predictive value considering the increasing bike demand annually.
+# * The 'year' column representing the years 2018 and 2019 might appear insignificant but might hold predictive value considering the increasing bike demand annually.
 # Model Building:
 # * The target variable ('cnt') represents the total number of bike rentals (casual + registered users).
 # * Utilize 'cnt' as the target variable and build a multiple linear regression model using other independent variables.
@@ -47,25 +47,25 @@ rcParams['figure.figsize'] = 11.7,8.27
 # Dataset characteristics
 # day.csv have the following fields:	
 # - instant: record index
-# - dteday : date
+# - date : date
 # - season : season (1:spring, 2:summer, 3:fall, 4:winter)
-# - yr : year (0: 2018, 1:2019)
-# - mnth : month ( 1 to 12)
+# - year : year (0: 2018, 1:2019)
+# - month : month ( 1 to 12)
 # - holiday : weather day is a holiday or not (extracted from http://dchr.dc.gov/page/holiday-schedule)
 # - weekday : day of the week
 # - workingday : if day is neither weekend nor holiday is 1, otherwise is 0.
-# + weathersit : 
+# + weather_code : 
 #     - 1: Clear, Few clouds, Partly cloudy, Partly cloudy
 #     - 2: Mist + Cloudy, Mist + Broken clouds, Mist + Few clouds, Mist
 #     - 3: Light Snow, Light Rain + Thunderstorm + Scattered clouds, Light Rain + Scattered clouds
 #     - 4: Heavy Rain + Ice Pallets + Thunderstorm + Mist, Snow + Fog
 # - temp : temperature in Celsius
 # - atemp: feeling temperature in Celsius
-# - hum: humidity
+# - humidity: humidity
 # - windspeed: wind speed
 # - casual: count of casual users
 # - registered: count of registered users
-# - cnt: count of total rental bikes including both casual and registered
+# - count: count of total rental bikes including both casual and registered
 
 
 #%%
@@ -75,6 +75,20 @@ filename = "day.csv"
 df = pd.read_csv(filename)
 df.head(7)
 
+#%%
+
+# rename the variables to something more meaningful for easier understanding
+
+column_names = {'dteday': 'date',
+                'yr': 'year',
+                'mnth': 'month',
+                'weathersit': 'weather_code',
+                'hum': 'humidity',
+                'cnt': 'count',
+                'atemp': 'apparent_temperature'}
+
+df.rename(columns=column_names, inplace=True)
+df
 # %%
 # shape of the dataset
 df.shape
@@ -88,8 +102,8 @@ df.info()
 
 #%% [markdown]
 
-# * Every field is numeric except dteday.
-# * dteday is in object form and needs to be converted to datetime format.
+# * Every field is numeric except date.
+# * date is in object form and needs to be converted to datetime format.
 
 
 #%%
@@ -106,25 +120,65 @@ len(df.describe().columns)
 # * But some of them need to be converted to categorical variables.
 #%% [markdown]
 
-# * cnt is the target variable. count of total rental bikes including both casual and registered
+# * count is the target variable. count of total rental bikes including both casual and registered
 # * instant is the record index and it is irrelevant to the target variable. 
 #
 #%%
 
 df1 = df.copy()
 
-# covert dteday to datetime format
-df1['dteday'] = pd.to_datetime(df['dteday'], format='%d-%m-%Y')
+# covert date to datetime format
+df1['date'] = pd.to_datetime(df['date'], format='%d-%m-%Y')
 
 df1.head()
 
-#%% [markdown]
-# * dteday is converted to datetime format.
+#%%
+# check the weekdays
+df2 = df1[['date', 'weekday', 'workingday', 'holiday', 'year', 'month']]
+df2['weekdayactual'] = df2.date.dt.weekday
+df2
+
+df2.head(14)
+# weekday is not actually matching with the date.
 
 #%%
 
+# check the correlation between the count with casual users and registered users
+print(df1["registered"].corr(df1["count"]))
+print(df1["casual"].corr(df1["count"]))
+
+df3 = df1[["registered", "casual", "count"]]
+df3["reg_casual_sum"] = df3["registered"] + df3["casual"]
+
+# check if the sum of registered and casual users is equal to the count
+(df3['reg_casual_sum'] == df3['count']).all()
+
+#%%
+
+#%%
+column = 'date'
+# number of unique values in date column
+print(df1[column].nunique())
+
+# minimum date and maximum date
+print(df1[column].min(), df1[column].max())
+
+
+#%%
+
+#%% [markdown]
+# * date is converted to datetime format.
+# * in the data mapping used is with sunday as 0, weekday in pandas is with monday as 0. After considering this difference weekday still does not match
+# * 2018 January 1 is a monday. But in the data it is a Saturday.
+# * I strongly feel that the data is not from 2018 2019 since the weekdays are not matching with the dates. But this will not change the analysis.
+# * Drop the instant column since it is irrelevant to the target variable.
+# * count is the sum of registered and casual users. So we must drop these two columns, otherwise the model will not have any practical use.
+# * drop the date column since we have the year, month, weekday, holiday, workingday columns.
+#%%
+
+columns_to_drop = ['instant', 'registered', 'casual', 'date']
 # drop the instant column
-df1.drop('instant', inplace=True, axis=1)
+df1.drop(columns_to_drop, inplace=True, axis=1)
 
 df1.head()
 #%%
@@ -187,7 +241,7 @@ for categorical_variable in categorical_variables:
 # * There are 2 values in workingday.
 # 0. weekend or holiday
 # 1. not weekend or holiday
-# * There are 4 values in weathersit.
+# * There are 4 values in weather_code.
 # - 1: Clear, Few clouds, Partly cloudy, Partly cloudy
 # - 2: Mist + Cloudy, Mist + Broken clouds, Mist + Few clouds, Mist
 # - 3: Light Snow, Light Rain + Thunderstorm + Scattered clouds, Light Rain + Scattered clouds
@@ -205,11 +259,11 @@ season_mapping = {1: 'Spring', 2: 'Summer', 3: 'Fall', 4: 'Winter'}
 # Map 'season' column to new categories using map()
 df1['season'] = df1['season'].map(season_mapping)
 
-# Define mapping dictionary for 'yr' column
+# Define mapping dictionary for 'year' column
 year_mapping = {0: 2018, 1: 2019}
 
-# Map 'yr' column to new year labels using map()
-df1['yr'] = df1['yr'].map(year_mapping)
+# Map 'year' column to new year labels using map()
+df1['year'] = df1['year'].map(year_mapping)
 
 
 # Dictionary mapping numeric months to their names
@@ -220,7 +274,7 @@ month_mapping = {
 }
 
 # Map 'month' column to month names using map()
-df1['mnth'] = df1['mnth'].map(month_mapping)
+df1['month'] = df1['month'].map(month_mapping)
 
 # Dictionary mapping binary holiday indicator to labels
 holiday_mapping = {0: 'Not a Holiday', 1: 'Holiday'}
@@ -252,17 +306,9 @@ shortened_weather_mapping = {
 }
 
 # Map 'weather_code' column to shortened categories using map()
-df1['weathersit'] = df1['weathersit'].map(shortened_weather_mapping)
+df1['weather_code'] = df1['weather_code'].map(shortened_weather_mapping)
 #%%
 len(df1.columns)
-
-#%%
-column = 'dteday'
-# number of unique values in date column
-print(df1[column].nunique())
-
-# minimum date and maximum date
-print(df1[column].min(), df1[column].max())
 
 #%%
 
@@ -300,8 +346,8 @@ plt.figure(figsize=(25, 25))
 
 for k in range(1, 8):
     plt.subplot(4, 2, k)
-    sns.boxplot(x=categorical_variables[k-1], y='cnt', data=df1)
-    plt.title(categorical_variables[k-1] + ' vs cnt')
+    sns.boxplot(x=categorical_variables[k-1], y='count', data=df1)
+    plt.title(categorical_variables[k-1] + ' vs count')
 plt.show()
 
 #%% [markdown]
@@ -327,7 +373,18 @@ df_train, df_test = train_test_split(df1, train_size = 0.7, test_size = 0.3, ran
 
 #%%
 
-# Apply scaler() to all the columns except the 'yes-no' and 'dummy' variables
 
 numerical_variables
-# df_train[num_vars] = scaler.fit_transform(df_train[num_vars])
+
+#%%
+# Apply scaler() to all numerical variables
+scaler = MinMaxScaler()
+df_train[numerical_variables] = scaler.fit_transform(df_train[numerical_variables])
+
+#%%
+
+df_train.head()
+
+#%%
+
+df_train.describe()
