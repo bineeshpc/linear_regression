@@ -1,6 +1,6 @@
 #%% [markdown]
-
-# 1. From your analysis of the categorical variables from the dataset, what could you infer about their effect on the dependent variable? 
+# # Assignment-based Subjective Questions
+# ## 1. From your analysis of the categorical variables from the dataset, what could you infer about their effect on the dependent variable? 
 
 # * Count is higher when it is not a holiday
 # * Count is higher in May, July, August, September, June in that order. We have good demand starting from april till September. Low demand on October, November, December, January, February.
@@ -10,31 +10,38 @@
 # * Demand is more on working days
 # * 2019 has higher demand than 2018.
 
-# 2. Why is it important to use drop_first=True during dummy variable creation? 
+#%% [markdown]
+# ## 2. Why is it important to use drop_first=True during dummy variable creation? 
 # <br> <br>
 # We will encounter a problem called Dummy variable trap. If we have n dummy variables, we need to use n-1 dummy variables. If we use n dummy variables, we will have multicollinearity problem.
 # one dummy variable can be predicted(perfectly correlated) using all other dummy variables. So we need to drop one dummy variable.
 
-# 3. Looking at the pair-plot among the numerical variables, which one has the highest correlation with the target variable? 
+#%% [markdown]
+# ## 3. Looking at the pair-plot among the numerical variables, which one has the highest correlation with the target variable? 
 
 # * apparent_temparature is highly correlated with count variable.
 
-# 4. How did you validate the assumptions of Linear Regression after building the model on the training set? 
+#%% [markdown]
+
+# ## 4. How did you validate the assumptions of Linear Regression after building the model on the training set? 
 
 # * Linearity assumption with partial residual plots
 # * Normality for residuals with Q-Q plots
 # * Homoscedasticity with Residuals vs Fitted plot
 # * No autocorrelation with Durbin-Watson test
 
-# 5. Based on the final model, which are the top 3 features contributing significantly towards explaining the demand of the shared bikes? 
+#%% [markdown]
+# ## 5. Based on the final model, which are the top 3 features contributing significantly towards explaining the demand of the shared bikes? 
 
 # * 2019               0.230502
 # * Light Snow/Rain   -0.248777
 # * temp               0.509836
 # * year, weather_code and temperature are the top 3 features contributing significantly towards explaining the demand of the shared bikes.
+
 #%% [markdown]
 
-# 1. Explain the linear regression algorithm in detail.
+# # General Subjective Questions
+# ## 1. Explain the linear regression algorithm in detail.
 # Linear regression is a supervised learning method for predicting continous variables.
 # Examples are price of a house, score of a student, demand of a product etc.
 # Since this is a supervised learning algorithm we need previous data for training a model.
@@ -182,10 +189,10 @@
 # variance
 # The inference part in multiple linear regression also, largely, remains the same.
 
+#%% [markdown]
+# ## 2. Explain the Anscombe’s quartet in detail.
 
-# 2. Explain the Anscombe’s quartet in detail.
-
-# 	 In 1973, the statistician Francis Anscombe used a clever set of bivariate datasets
+# In 1973, the statistician Francis Anscombe used a clever set of bivariate datasets
 # (now known as Anscombe’s quartet) to illustrate the importance of graphing data
 # as a component of statistical analyses. In his example, each of the four datasets 
 # yielded identical regression coefficients and model fits, and yet when visualized 
@@ -219,7 +226,7 @@ plt.tight_layout()
 plt.show()
 
 #%% [markdown]
-# 3. What is Pearson’s R?
+# ## 3. What is Pearson’s R?
 # <br> <br>
 # Karl Pearson developed the statistical measure now known as Pearson’s r, 
 # or the Pearson product-moment correlation coefficient, around the turn of the 20th century. 
@@ -229,7 +236,8 @@ plt.show()
 # It is given by
 # $$ r = \frac{\sum_{i=1}^n (x_i - \bar{x})(y_i - \bar{y})}{\sqrt{\sum_{i=1}^n (x_i - \bar{x})^2} \sqrt{\sum_{i=1}^n (y_i - \bar{y})^2}} $$
 
-# 4. What is scaling? Why is scaling performed? What is the difference between normalized scaling
+#%% [markdown]
+# ## 4. What is scaling? Why is scaling performed? What is the difference between normalized scaling
 # and standardized scaling?
 # <br> <br>
 # Feature scaling is an important aspect to consider when dealing with a lot of independent variables in a model. 
@@ -260,16 +268,16 @@ plt.show()
 
 
 #%% [markdown]
-# 5. You might have observed that sometimes the value of VIF is infinite. Why does this happen? 
+# ## 5. You might have observed that sometimes the value of VIF is infinite. Why does this happen? 
 # <br> <br>
 # When Variance inflation factor(VIF) is infinite it indicates perfect multicollinearity between independent variables.
 # Perfect multicollinearity means One variable can be predicted by other variables. We need to drop the vairables that cause 
 # multicollinearity 
  
 #%% [markdown]
-# 6. What is a Q-Q plot? Explain the use and importance of a Q-Q plot in linear regression.
+# ## 6. What is a Q-Q plot? Explain the use and importance of a Q-Q plot in linear regression.
 # <br> <br>
-# A **Q-Q plot** (quantile-quantile plot) is a probability plot, a graphical method for comparing 
+# A Q-Q plot (quantile-quantile plot) is a probability plot, a graphical method for comparing 
 # two probability distributions by plotting their quantiles against each other. 
 # A Q-Q plot is a plot of the quantiles of two distributions against each other, 
 # or a plot based on estimates of the quantiles. 
@@ -287,7 +295,7 @@ plt.show()
 # The use of Q-Q plots to compare two samples of data can be viewed as a non-parametric approach
 # to comparing their underlying distributions. 
 # <br> <br>
- # In linear regression, Q-Q plots are used to check the normality assumption of the residuals. 
+# In linear regression, Q-Q plots are used to check the normality assumption of the residuals. 
 # If the residuals are normally distributed, the Q-Q plot will be approximately a straight line. 
 # If the residuals are not normally distributed, the Q-Q plot will deviate from a straight line.
 # This indicates that the normality assumption of the residuals has been violated, 
