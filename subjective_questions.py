@@ -236,6 +236,11 @@ plt.show()
 # It is given by
 # $$ r = \frac{\sum_{i=1}^n (x_i - \bar{x})(y_i - \bar{y})}{\sqrt{\sum_{i=1}^n (x_i - \bar{x})^2} \sqrt{\sum_{i=1}^n (y_i - \bar{y})^2}} $$
 
+# $$ \text{where } x \text{ and } y \text{ are the two variables, } $$
+# $$ n \text{ is the number of observations, } $$
+# $$ x_i \text{ and } y_i \text{ are the individual observations, and } $$
+# $$ \bar{x} \text{ and } \bar{y} \text{ are the means of } x \text{ and } y \text{, respectively.} $$
+
 #%% [markdown]
 # ## 4. What is scaling? Why is scaling performed? What is the difference between normalized scaling
 # and standardized scaling?
