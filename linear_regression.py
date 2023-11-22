@@ -34,7 +34,10 @@ import sklearn.feature_selection as feature_selection
 import sklearn.pipeline as pipeline
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
-
+from sklearn.feature_selection import RFE
+from sklearn.linear_model import LinearRegression
+from statsmodels.stats.outliers_influence import variance_inflation_factor
+from statsmodels.stats.stattools import durbin_watson
 
 import warnings
 warnings.filterwarnings('ignore')
@@ -350,6 +353,26 @@ for k in range(1, 8):
     plt.title(categorical_variables[k-1] + ' vs count')
 plt.show()
 
+#%%
+plt.figure(figsize=(25, 55))
+for k in range(1, 8):
+    plt.subplot(4, 2, k)
+    df_count = df1.groupby(categorical_variables[k-1])['count'].mean().sort_values()
+    display(df_count)
+    df_count.plot.bar()
+    plt.title(categorical_variables[k-1] + 'vs count')
+    
+plt.show()
+
+#%% [markdown]
+
+# *Count is higher when it is not a holiday
+# * Count is higher in May, July, August, September, June in that order. We have good demand starting from april till September. Low demand on October, November, December, January, February.
+# * Summer and Fall has higher demand than Spring and Winter. Spring has the lowest demand.
+# * clear whether has higher demand than misty weather and rainy weather
+# * Demand is the least on sundays.
+# * Demand is more on working days
+# * 2019 has higher demand than 2018.
 #%% [markdown]
 
 # # 3. Data Preparation
@@ -420,3 +443,110 @@ plt.show()
 
 y_train = df_train["count"]
 X_train = df_train.drop(["count"], axis=1)
+
+#%%
+
+len(X_train.columns)
+#%%
+
+# Running RFE with the output number of the variable equal to 10
+lm = LinearRegression()
+lm.fit(X_train, y_train)
+
+rfe = RFE(lm, n_features_to_select=15)             # running RFE
+rfe = rfe.fit(X_train, y_train)
+
+#%%
+
+rfe_df = pd.DataFrame({"column": X_train.columns,
+              "support": rfe.support_,
+              "ranking": rfe.ranking_})
+
+rfe_df.sort_values(by="ranking", inplace=True)
+
+rfe_df
+
+#%%
+
+selected_columns = X_train.columns[rfe.support_]
+selected_columns
+
+# Creating X_test dataframe with RFE selected variables
+X_train_rfe = X_train[selected_columns]
+X_train_rfe = sm.add_constant(X_train_rfe)
+
+lm = sm.OLS(y_train,X_train_rfe).fit()   # Running the linear model
+
+#Let's see the summary of our linear model
+print(lm.summary())
+
+#%%
+
+vif = pd.DataFrame()
+X = X_train_rfe
+vif['Features'] = X.columns
+vif['VIF'] = [variance_inflation_factor(X.values, i) for i in range(X.shape[1])]
+vif['VIF'] = round(vif['VIF'], 2)
+vif = vif.sort_values(by = "VIF", ascending = False)
+vif
+
+#%%
+
+y_train_count = lm.predict(X_train_rfe)
+
+#%%
+# Plot the histogram of the error terms
+fig = plt.figure()
+sns.distplot((y_train - y_train_count), bins = 20)
+fig.suptitle('Error Terms', fontsize = 20)                  # Plot heading 
+plt.xlabel('Errors', fontsize = 18)
+
+##
+
+#%%
+# 1. Linearity Assumption (Using Partial Residual Plots)
+sm.graphics.plot_partregress_grid(lm)
+plt.show()
+
+#%%
+
+# 2. Normality of Residuals (QQ Plot)
+residuals = lm.resid
+fig = sm.graphics.qqplot(residuals, line='45')
+plt.show()
+
+#%%
+# 4. Independence of Residuals (Durbin-Watson Statistic)
+
+durbinWatson = durbin_watson(residuals)
+print(f"Durbin-Watson Statistic: {durbinWatson}")
+#%%
+
+
+df_test[numerical_variables] = scaler.transform(df_test[numerical_variables])
+
+y_test = df_test["count"]
+X_test = df_test.drop(["count"], axis=1)
+
+# Creating X_test_new dataframe by dropping variables from X_test
+X_test_new = X_test[selected_columns]
+
+# Adding a constant variable 
+X_test_new = sm.add_constant(X_test_new)
+
+#%%
+# Making predictions
+y_pred = lm.predict(X_test_new)
+
+#%%
+
+# Plotting y_test and y_pred to understand the spread.
+fig = plt.figure()
+plt.scatter(y_test,y_pred)
+fig.suptitle('y_test vs y_pred', fontsize=20)              # Plot heading 
+plt.xlabel('y_test', fontsize=18)                          # X-label
+plt.ylabel('y_pred', fontsize=16)
+
+#%%
+
+print("plotting y_test and y_pred to understand the spread.")
