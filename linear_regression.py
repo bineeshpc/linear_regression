@@ -365,8 +365,8 @@ for k in range(1, 8):
 plt.show()
 
 #%% [markdown]
-
-# *Count is higher when it is not a holiday
+# 
+# * Count is higher when it is not a holiday
 # * Count is higher in May, July, August, September, June in that order. We have good demand starting from april till September. Low demand on October, November, December, January, February.
 # * Summer and Fall has higher demand than Spring and Winter. Spring has the lowest demand.
 # * clear whether has higher demand than misty weather and rainy weather
@@ -515,6 +515,15 @@ residuals = lm.resid
 fig = sm.graphics.qqplot(residuals, line='45')
 plt.show()
 
+#%% 
+
+# 3. Homoscedasticity (Residuals vs Fitted Values Plot)
+plt.scatter(lm.fittedvalues, lm.resid)
+plt.xlabel('Fitted Values')
+plt.ylabel('Residuals')
+plt.title('Residuals vs Fitted Values')
+plt.axhline(y=0, color='r', linestyle='-')
+plt.show()
 #%%
 # 4. Independence of Residuals (Durbin-Watson Statistic)
 
@@ -550,3 +559,6 @@ plt.ylabel('y_pred', fontsize=16)
 #%%
 
 print("plotting y_test and y_pred to understand the spread.")
+
+#%%
+lm.params[lm.params.abs().sort_values().index]
